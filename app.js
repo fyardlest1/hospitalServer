@@ -10,6 +10,22 @@ const hospitalRouter = require('./routes/hospitalRouter');
 const promotionRouter = require('./routes/promotionRouter');
 const partnerRouter = require('./routes/partnerRouter');
 
+const mongoose = require("mongoose");
+
+// const url = "mongodb+srv://fyardlest:YoodY123789@cluster0.avbyx.mongodb.net/hospitals?retryWrites=true&w=majority";
+const url = "mongodb://localhost:27017/hospitalsite";
+const connect = mongoose.connect(url, {
+  useCreateIndex: true,
+  useFindAndModify: false,
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+connect.then(
+  () => console.log("Connected correctly to server"),
+  (err) => console.log(err)
+);
+
 const app = express();
 
 // view engine setup
@@ -43,5 +59,18 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+
+// mongoose
+//   .connect(
+//     "mongodb+srv://fyardlest:YoodY123789@cluster0.avbyx.mongodb.net/hospitals?retryWrites=true&w=majority",
+//     { useNewUrlParser: true }
+//   )
+//   .then(() => {
+//     app.listen(5000);
+//   })
+//   .catch((err) => {
+//     console.log(err);
+//   });
 
 module.exports = app;
