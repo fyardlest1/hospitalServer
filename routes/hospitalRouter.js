@@ -20,7 +20,7 @@ hospitalRouter
       })
       .catch((err) => next(err));
   })
-  .post(authenticate.verifyUser, (req, res, next) => {
+  .post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Hospital.create(req.body)
       .then((hospital) => {
         console.log("Hospital Created", hospital);
@@ -34,7 +34,7 @@ hospitalRouter
     res.statusCode = 403;
     res.end("PUT operation not supported on /hospitals");
   })
-  .delete(authenticate.verifyUser, (req, res, next) => {
+  .delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Hospital.deleteMany()
       .then((response) => {
         res.statusCode = 200;
@@ -63,7 +63,7 @@ hospitalRouter
       `POST operation not supported on /hospitals/${req.params.hospitalId}`
     );
   })
-  .put(authenticate.verifyUser, (req, res, next) => {
+  .put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Hospital.findByIdAndUpdate(
       req.params.hospitalId,
       {
@@ -78,7 +78,7 @@ hospitalRouter
       })
       .catch((err) => next(err));
   })
-  .delete(authenticate.verifyUser, (req, res, next) => {
+  .delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Hospital.findByIdAndDelete(req.params.hospitalId)
       .then((response) => {
         res.statusCode = 200;
@@ -135,7 +135,7 @@ hospitalRouter
       `PUT operation not supported on /hospitals/${req.params.hospitalId}/comments`
     );
   })
-  .delete(authenticate.verifyUser, (req, res, next) => {
+  .delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
     Hospital.findById(req.params.hospitalId)
       .then((hospital) => {
         if (hospital) {
@@ -192,20 +192,28 @@ hospitalRouter
     Hospital.findById(req.params.hospitalId)
       .then((hospital) => {
         if (hospital && hospital.comments.id(req.params.commentId)) {
-          if (req.body.rating) {
-            hospital.comments.id(req.params.commentId).rating = req.body.rating;
+           // Updating comments: Allow logged-in users to update any comments that they themselves submitted.
+          if (hospital.comments.id(req.params.hospitalId).author._id.equals(req.user._id)) {
+            if (req.body.rating) {
+              hospital.comments.id(req.params.commentId).rating = req.body.rating;
+            }
+            if (req.body.text) {
+              hospital.comments.id(req.params.commentId).text = req.body.text;
+            }
+            hospital
+              .save()
+              .then((hospital) => {
+                res.statusCode = 200;
+                res.setHeader("Content-Type", "application/json");
+                res.json(hospital);
+              })
+              .catch((err) => next(err));
+          } else {
+            err = new Error("Sorry, You are not allowed to modify this content");
+            res.status = 403;
+            return next(err);
           }
-          if (req.body.text) {
-            hospital.comments.id(req.params.commentId).text = req.body.text;
-          }
-          hospital
-            .save()
-            .then((hospital) => {
-              res.statusCode = 200;
-              res.setHeader("Content-Type", "application/json");
-              res.json(hospital);
-            })
-            .catch((err) => next(err));
+          
         } else if (!hospital) {
           err = new Error(`hospital ${req.params.hospitalId} not found`);
           err.status = 404;
