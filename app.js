@@ -11,6 +11,7 @@ const hospitalRouter = require('./routes/hospitalRouter');
 const promotionRouter = require('./routes/promotionRouter');
 const partnerRouter = require('./routes/partnerRouter');
 const contactRouter =  require('./routes/contactRouter');
+const uploadRouter = require("./routes/uploadRouter");
 
 const mongoose = require("mongoose");
 
@@ -59,6 +60,7 @@ app.use('/hospitals', hospitalRouter);
 app.use('/promotions', promotionRouter);
 app.use('/partners', partnerRouter);
 app.use('/contact', contactRouter);
+app.use("/imageUpload", uploadRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
