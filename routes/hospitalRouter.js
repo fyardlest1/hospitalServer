@@ -12,6 +12,7 @@ hospitalRouter
   .route("/")
   .get((req, res, next) => {
     Hospital.find()
+    .populate('comments.creator')
       .then((hospital) => {
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
@@ -48,6 +49,7 @@ hospitalRouter
   .route("/:hospitalId")
   .get((req, res, next) => {
     Hospital.findById(req.params.hospitalId)
+      .populate("comments.creator")
       .then((hospital) => {
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json");
@@ -91,6 +93,7 @@ hospitalRouter
   .route("/:hospitalId/comments")
   .get((req, res, next) => {
     Hospital.findById(req.params.hospitalId)
+      .populate("comments.creator")
       .then((hospital) => {
         if (hospital) {
           res.statusCode = 200;
@@ -108,6 +111,7 @@ hospitalRouter
     Hospital.findById(req.params.hospitalId)
       .then((hospital) => {
         if (hospital) {
+          req.body.creator = req.user._id;
           hospital.comments.push(req.body);
           hospital
             .save()
@@ -118,7 +122,7 @@ hospitalRouter
             })
             .catch((err) => next(err));
         } else {
-          err = new Error(`hospital ${req.params.hospitalId} not found`);
+          err = new Error(`Hospital ${req.params.hospitalId} not found`);
           err.status = 404;
           return next(err);
         }
@@ -147,7 +151,7 @@ hospitalRouter
             })
             .catch((err) => next(err));
         } else {
-          err = new Error(`hospital ${req.params.hospitalId} not found`);
+          err = new Error(`Hospital ${req.params.hospitalId} not found`);
           err.status = 404;
           return next(err);
         }
@@ -160,6 +164,7 @@ hospitalRouter
   .route("/:hospitalId/comments/:commentId")
   .get((req, res, next) => {
     Hospital.findById(req.params.hospitalId)
+      .populate("comments.creator")
       .then((hospital) => {
         if (hospital && hospital.comments.id(req.params.commentId)) {
           res.statusCode = 200;

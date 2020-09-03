@@ -15,9 +15,9 @@ const commentSchema = new Schema({
         type: String,
         required: true
     },
-    author: {
-        type: String,
-        required: true
+    creator: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     }
 }, {
     timestamps: true
@@ -60,10 +60,10 @@ const hospitalSchema = new Schema({
         type: Boolean,
         required: true
     },
-    creator: {
-        type: String,
-        required: true
-    },
+    // creator: {
+    //     type: String,
+    //     required: true
+    // },
     description: {
         type: String,
         required: true
